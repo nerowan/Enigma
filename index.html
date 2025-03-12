@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>神秘登陆</title>
+  <style>
+    /* 通用样式重置，避免不同设备/浏览器差异 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background: #000; /* 背景为黑色，增强神秘感 */
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #333 0%, #000 100%);
+    }
+
+    /* 登录容器 */
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(6px);
+      border-radius: 8px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px; /* 在 PC 端显示更舒适，也适配移动端 */
+      text-align: center;
+    }
+
+    .login-container h1 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+    }
+
+    /* 添加“永远不要尝试输入密码 ———苏哲”提示 */
+    .warning {
+      font-size: 0.9rem;
+      color: #ffcccc;
+      margin-bottom: 15px;
+    }
+
+    .login-container input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #444;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #666;
+    }
+
+    /* 神秘内容区域 */
+    .mystery-section {
+      display: none; /* 默认隐藏，登陆成功后显示 */
+      text-align: center;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .mystery-section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 8px rgba(255, 0, 255, 0.8);
+    }
+
+    .mystery-section p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    /* 进入时动画 */
+    .show {
+      animation: fadeInScale 1s forwards;
+    }
+
+    @keyframes fadeInScale {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* 针对移动端微调 */
+    @media (max-width: 768px) {
+      .login-container h1 {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 登录区域 -->
+  <div id="loginSection" class="login-container">
+    <h1>神秘入口</h1>
+    <!-- 新增警示文字 -->
+    <div class="warning">永远不要尝试输入密码 ———苏哲</div>
+    <form onsubmit="return checkLogin(event)">
+      <input type="text" id="username" placeholder="用户名" required />
+      <input type="password" id="password" placeholder="密码" required />
+      <button type="submit">登 录</button>
+    </form>
+  </div>
+
+  <!-- 登录成功后显示的神秘区域 -->
+  <div id="mysterySection" class="mystery-section">
+    <h2>欢迎进入神秘空间</h2>
+    <p>你已成功开启神秘之门</p>
+    <p>神秘地点：<strong>神秘的地方</strong></p>
+    <p>传说这里散发着未知力量，唯有获得许可者方能一探究竟。</p>
+  </div>
+
+  <script>
+    function checkLogin(event) {
+      event.preventDefault(); // 阻止默认提交行为
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // 判断用户名和密码
+      if (username === "Nero" && password === "123456") {
+        // 隐藏登录区域
+        document.getElementById("loginSection").style.display = "none";
+        // 显示神秘区域
+        const mysterySection = document.getElementById("mysterySection");
+        mysterySection.style.display = "block";
+        // 添加动画效果
+        mysterySection.classList.add("show");
+      } else {
+        alert("用户名或密码错误！");
+      }
+      return false; // 不执行默认表单提交
+    }
+  </script>
+</body>
+</html>
