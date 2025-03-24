@@ -2,165 +2,191 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>神秘登陆</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>神秘入口 - 示例一（已修复）</title>
   <style>
-    /* 通用样式重置，避免不同设备/浏览器差异 */
+    /* 通用重置与字体 */
     * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "微软雅黑", "Microsoft YaHei", sans-serif;
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
     }
-
     body {
-      background: #000; /* 背景为黑色，增强神秘感 */
+      background: #000;
       color: #fff;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at center, #333 0%, #000 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    /* 背景霓虹+迷雾 */
+    body::before {
+      content: "";
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: conic-gradient(from 0deg, #300000, #d00000, #600000, #100000);
+      animation: swirl 8s linear infinite;
+      opacity: 0.2;
+      z-index: -2;
+    }
+    @keyframes swirl {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at center, rgba(255,0,0,0.2), transparent 70%);
+      animation: pulse 5s infinite alternate;
+      z-index: -1;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.2; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+      100% { transform: scale(1); opacity: 0.2; }
     }
 
-    /* 登录容器 */
-    .login-container {
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(6px);
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(4px);
       border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.2);
       padding: 20px;
-      width: 90%;
-      max-width: 400px; /* 在 PC 端显示更舒适，也适配移动端 */
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-
-    .login-container h1 {
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+    .container h1 {
+      margin-bottom: 15px;
       letter-spacing: 2px;
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+      font-size: 1.4rem;
+      text-shadow: 0 0 5px rgba(255,255,255,0.6);
     }
-
-    /* 添加“永远不要尝试输入密码 ———苏哲”提示 */
     .warning {
+      color: #ffdddd;
+      margin-bottom: 15px;
       font-size: 0.9rem;
-      color: #ffcccc;
-      margin-bottom: 15px;
+      text-shadow: 0 0 5px rgba(255,255,255,0.3);
     }
-
-    .login-container input {
-      display: block;
+    .container input {
       width: 100%;
+      margin-bottom: 12px;
       padding: 10px;
-      margin-bottom: 15px;
       border: none;
       border-radius: 4px;
-      font-size: 1rem;
       outline: none;
+      font-size: 1rem;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
     }
-
-    .login-container button {
+    .container button {
       width: 100%;
       padding: 10px;
-      background-color: #444;
       border: none;
       border-radius: 4px;
-      font-size: 1rem;
+      background: linear-gradient(135deg, #400000, #d00000);
       color: #fff;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background 0.3s;
+    }
+    .container button:hover {
+      background: linear-gradient(135deg, #600000, #ff4040);
     }
 
-    .login-container button:hover {
-      background-color: #666;
+    /* result-area 默认隐藏，通过 .active 来显示 */
+    .result-area {
+      display: none;
+      padding: 20px 0;
+      animation: fadeInUp 0.8s forwards;
+    }
+    .result-area.active {
+      display: block;
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* 神秘内容区域 */
-    .mystery-section {
-      display: none; /* 默认隐藏，登陆成功后显示 */
-      text-align: center;
-      width: 90%;
-      max-width: 600px;
+    /* 登录区默认显示 */
+    .login-area.active { display: block; }
+    .login-area {
+      display: none;
+    }
+    /* 默认让登录区域先显示 */
+    #loginArea.active {
+      display: block;
     }
 
-    .mystery-section h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      text-shadow: 0 0 8px rgba(255, 0, 255, 0.8);
-    }
-
-    .mystery-section p {
-      font-size: 1.2rem;
-      line-height: 1.6;
-      margin-bottom: 10px;
-    }
-
-    /* 进入时动画 */
-    .show {
-      animation: fadeInScale 1s forwards;
-    }
-
-    @keyframes fadeInScale {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* 针对移动端微调 */
     @media (max-width: 768px) {
-      .login-container h1 {
-        font-size: 1.25rem;
+      .container h1 {
+        font-size: 1.2rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 登录区域 -->
-  <div id="loginSection" class="login-container">
-    <h1>神秘入口</h1>
-    <!-- 新增警示文字 -->
-    <div class="warning">永远不要尝试输入密码 ———苏哲</div>
-    <form onsubmit="return checkLogin(event)">
-      <input type="text" id="username" placeholder="用户名" required />
-      <input type="password" id="password" placeholder="密码" required />
-      <button type="submit">登 录</button>
-    </form>
-  </div>
+  <div class="container">
+    <!-- 登录区域 -->
+    <div class="login-area active" id="loginArea">
+      <h1>神秘入口 - 示例一（已修复）</h1>
+      <div class="warning">永远不要尝试输入密码 —— 苏哲</div>
+      <div>
+        <input type="text" id="username" placeholder="用户名 (Chicago)" />
+        <input type="password" id="password" placeholder="密码 (2751659)" />
+      </div>
+      <button onclick="checkLogin()">登 录</button>
+    </div>
 
-  <!-- 登录成功后显示的神秘区域 -->
-  <div id="mysterySection" class="mystery-section">
-    <h2>欢迎进入神秘空间</h2>
-    <p>你已成功开启神秘之门</p>
-    <p>神秘地点：<strong>神秘的地方</strong></p>
-    <p>传说这里散发着未知力量，唯有获得许可者方能一探究竟。</p>
-  </div>
+    <!-- 登录成功后显示的神秘区块 -->
+    <div class="result-area" id="successArea">
+      <h2>前往开放之城</h2>
+      <p>你已通过第一重考验，下一步的谜题与冒险正等着你……</p>
+    </div>
+  </div><!-- container -->
 
   <script>
-    function checkLogin(event) {
-      event.preventDefault(); // 阻止默认提交行为
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-
-      // 判断用户名和密码
-      if (username === "Nero" && password === "123456") {
+    function checkLogin() {
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      if (user === "Chicago" && pass === "2751659") {
         // 隐藏登录区域
-        document.getElementById("loginSection").style.display = "none";
-        // 显示神秘区域
-        const mysterySection = document.getElementById("mysterySection");
-        mysterySection.style.display = "block";
-        // 添加动画效果
-        mysterySection.classList.add("show");
+        document.getElementById("loginArea").classList.remove("active");
+        document.getElementById("loginArea").style.display = "none";
+        // 显示结果区域
+        document.getElementById("successArea").classList.add("active");
       } else {
-        alert("用户名或密码错误！");
+        shakeLoginArea();
       }
-      return false; // 不执行默认表单提交
     }
+
+    // 错误时的小震动提示
+    function shakeLoginArea() {
+      const login = document.getElementById("loginArea");
+      login.style.animation = "shake 0.3s";
+      login.addEventListener("animationend", () => {
+        login.style.animation = "";
+      }, { once: true });
+    }
+
+    // 震动动画定义
+    document.head.insertAdjacentHTML("beforeend", `
+      <style>
+      @keyframes shake {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-5px); }
+        40% { transform: translateX(5px); }
+        60% { transform: translateX(-5px); }
+        80% { transform: translateX(5px); }
+        100% { transform: translateX(0); }
+      }
+      </style>
+    `);
   </script>
 </body>
 </html>
