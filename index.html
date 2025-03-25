@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>神秘·最终答案</title>
+  <title>最终答案提交1</title>
   <style>
-    /**************************************************************
-     *               全局与自适应基础样式（手机/平板/桌面）        *
-     *************************************************************/
+    /* 通用重置与简单样式 */
     * {
       margin: 0; 
       padding: 0; 
@@ -16,71 +14,33 @@
     }
     html, body {
       width: 100%; 
-      height: 100%; 
+      height: 100%;
       background: #000;
       color: #fff;
-      overflow: hidden; /* 避免滚动 */
+      overflow: hidden; /* 不出现滚动条 */
     }
     body {
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
       position: relative;
     }
 
-    /* body 背景暗涌与微光 */
-    body::before {
-      content: "";
-      position: absolute;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: conic-gradient(#010101, #111, #222, #000, #010101);
-      animation: swirlBg 10s linear infinite;
-      opacity: 0.4;
-      z-index: -3;
-    }
-    @keyframes swirlBg {
-      100% { transform: rotate(360deg); }
-    }
-    body::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle, rgba(255,255,255,0.02), transparent 50%);
-      animation: flickerBg 8s infinite alternate;
-      z-index: -2;
-    }
-    @keyframes flickerBg {
-      0%,100% { opacity: 0.1; }
-      50% { opacity: 0.3; }
-    }
-
-    /**************************************************************
-     *                    提交区域容器（初始显示）                 *
-     *************************************************************/
+    /* 容器：只用来收集输入答案和按钮 */
     .container {
       width: 90%;
-      max-width: 500px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(5px);
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      max-width: 400px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
       padding: 20px;
       text-align: center;
       position: relative;
-      z-index: 1;
-      overflow: hidden;
+      z-index: 1; /* 高于视频 */
     }
     h1 {
       margin-bottom: 15px;
-      font-size: 1.4rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 5px rgba(255,255,255,0.4);
-    }
-    p {
-      margin-bottom: 15px;
-      line-height: 1.6;
-      opacity: 0.9;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
     }
     .input-group {
       margin-bottom: 15px;
@@ -91,371 +51,110 @@
       border: none;
       border-radius: 4px;
       outline: none;
-      font-size: 1rem;
-      background: rgba(0, 0, 0, 0.2);
+      background: #222;
       color: #fff;
+      font-size: 1rem;
     }
     button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       border: none;
       border-radius: 4px;
-      background: linear-gradient(135deg, #444, #888);
+      background: #666;
       color: #fff;
       font-size: 1rem;
       cursor: pointer;
       transition: background 0.3s;
     }
     button:hover {
-      background: linear-gradient(135deg, #666, #aaa);
+      background: #888;
     }
 
-    /* 媒体查询：适配不同屏宽 */
-    @media (max-width: 768px) {
-      .container {
-        max-width: 340px;
-        padding: 16px;
-      }
-      h1 { font-size: 1.2rem; }
-    }
-    @media (min-width:769px) and (max-width:1023px) {
-      .container {
-        max-width: 420px;
-        padding: 20px;
-      }
-      h1 { font-size: 1.3rem; }
-    }
-    @media (min-width:1024px) {
-      .container {
-        max-width: 600px;
-        padding: 30px;
-      }
-      h1 { font-size: 1.5rem; }
-    }
-
-    /**************************************************************
-     *                全屏覆盖的失败视频（自动播放）               *
-     *************************************************************/
-    #failVideo {
+    /* 两个全屏覆盖的视频，默认隐藏 */
+    video {
       display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100%;
+      width: 100%; 
       height: 100%;
       object-fit: cover;
-      z-index: 999; /* 最前端覆盖 */
+      z-index: 999; /* 最高层覆盖 */
       background: #000;
-    }
-
-    /**************************************************************
-     *                成功后的炫酷动画区（全屏覆盖）               *
-     *************************************************************/
-    .success-fullscreen {
-      display: none;
-      position: fixed;  /* 全屏覆盖 */
-      top: 0; left: 0;
-      width: 100%; 
-      height: 100%;
-      z-index: 998; /* 仅次于failVideo层 */
-      overflow: hidden;
-      background: transparent;
-    }
-    .success-fullscreen.active {
-      display: block;
-    }
-
-    /* 背景多层动画：分阶段出现 */
-    .layer1::before,
-    .layer2::before,
-    .layer3::before,
-    .layer4::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      opacity: 0; 
-      mix-blend-mode: screen; /* 让色彩更炫 */
-      z-index: -1;
-    }
-    .layer1::before {
-      background: conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
-      animation: layer1Anim 5s linear forwards;
-    }
-    @keyframes layer1Anim {
-      0% { transform: rotate(0deg) scale(1); opacity: 0.2; }
-      25% { transform: rotate(90deg) scale(1.1); }
-      50% { transform: rotate(180deg) scale(1.2); opacity: 0.6; }
-      75% { transform: rotate(270deg) scale(1.3); }
-      100% { transform: rotate(360deg) scale(1.4); opacity: 0; }
-    }
-
-    .layer2::before {
-      background: radial-gradient(circle, #ff0088, transparent 60%);
-      animation: layer2Anim 5s linear forwards;
-      animation-delay: 5s;
-    }
-    @keyframes layer2Anim {
-      0% { opacity: 0; transform: scale(0.5); }
-      25% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.2); }
-      75% { opacity: 0.4; transform: scale(1.5); }
-      100% { opacity: 0; transform: scale(2); }
-    }
-
-    .layer3::before {
-      background: repeating-linear-gradient(
-        45deg,
-        rgba(0,255,255,0.4) 0  , 
-        rgba(255,0,255,0.4)   10px, 
-        rgba(255,0,255,0.1)   10px,
-        transparent           20px
-      );
-      animation: layer3Anim 5s linear forwards;
-      animation-delay: 10s;
-    }
-    @keyframes layer3Anim {
-      0% { opacity: 0; transform: scale(1) rotate(0deg); }
-      25% { opacity: 0.6; transform: scale(1.2) rotate(90deg); }
-      50% { opacity: 0.8; transform: scale(1.5) rotate(180deg); }
-      75% { opacity: 0.4; transform: scale(1.3) rotate(270deg); }
-      100% { opacity: 0; transform: scale(1) rotate(360deg); }
-    }
-
-    .layer4::before {
-      background: radial-gradient(circle, #ffffff, transparent 40%);
-      animation: layer4Anim 5s forwards;
-      animation-delay: 15s;
-    }
-    @keyframes layer4Anim {
-      0% { opacity: 0; transform: scale(0.5); }
-      25% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.3); }
-      75% { opacity: 0.8; transform: scale(1.6); }
-      100% { opacity: 0; transform: scale(2); }
-    }
-
-    /* 彩屑与激光线 */
-    .confetti-container {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; 
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 1;
-    }
-    .confetti {
-      position: absolute;
-      width: 8px; 
-      height: 8px;
-      background: #ff0;
-      border-radius: 50%;
-      animation: confettiFly 4s forwards;
-    }
-    @keyframes confettiFly {
-      0% {
-        transform: translate(0,0) rotate(0deg);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--tx), var(--ty)) rotate(720deg);
-        opacity: 0;
-      }
-    }
-
-    .laser {
-      position: absolute;
-      background: linear-gradient(90deg, rgba(255,255,255,0), #fff, rgba(255,255,255,0));
-      opacity: 0.7;
-      animation: laserAnim 1.2s forwards;
-    }
-    @keyframes laserAnim {
-      0% { opacity: 0.7; }
-      80% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    /* 最终显示“恭喜你通关了” */
-    .congrats {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      font-size: 2rem;
-      text-shadow: 0 0 8px #fff;
-      opacity: 0;
-      animation: appearEnd 2s forwards;
-      animation-delay: 18s; /* 在第18秒时出现 */
-      z-index: 11;
-    }
-    @keyframes appearEnd {
-      0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-<!-- 全屏覆盖的失败视频 -->
+<!-- 失败视频 -->
 <video id="failVideo" autoplay muted playsinline></video>
+<!-- 成功视频 -->
+<video id="successVideo" autoplay muted playsinline></video>
 
-<!-- 初始显示的容器，用来提交答案 -->
+<!-- 答案提交区 -->
 <div class="container" id="submitContainer">
   <h1>最终答案提交</h1>
-  <p>请输入你的最终答案</strong></p>
+  <p>请输入你的最终答案。</p>
   <div class="input-group">
-    <input type="text" id="finalAnswer" placeholder="输入你的答案...">
+    <input type="text" id="finalAnswer" placeholder="输入答案..."/>
   </div>
   <button onclick="submitAnswer()">提 交</button>
 </div>
 
-<!-- 成功的炫酷动画区：全屏覆盖 -->
-<div class="success-fullscreen" id="successFullscreen">
-  <!-- 分段式四层动画 -->
-  <div class="layer1"></div>
-  <div class="layer2"></div>
-  <div class="layer3"></div>
-  <div class="layer4"></div>
-
-  <!-- 粒子 & 激光 -->
-  <div class="confetti-container" id="confettiArea"></div>
-
-  <!-- 最后显示恭喜文字 -->
-  <div class="congrats">恭喜你通关了！</div>
-</div>
-
 <script>
-/* 1) 正确答案可自定义；2) 同目录下需有 fail.mp4 */
+/* 
+  1) 假设正确答案是 "TRIUMPH"（可改）
+  2) 本地需有 success.mp4 和 fail.mp4
+*/
 const CORRECT_ANSWER = "TRIUMPH";
 const failVideo = document.getElementById("failVideo");
-failVideo.src = "fail.mp4"; // 请确保在同目录
+const successVideo = document.getElementById("successVideo");
+
+// 指定视频文件路径（同一文件夹）
+failVideo.src = "fail.mp4";
+successVideo.src = "success.mp4";
 
 function submitAnswer(){
-  const ans = document.getElementById("finalAnswer").value.trim().toUpperCase();
-  if(ans === CORRECT_ANSWER){
-    startSuccessAnimation();
+  const userAnswer = document.getElementById("finalAnswer").value.trim().toUpperCase();
+  // 隐藏提交容器
+  const container = document.getElementById("submitContainer");
+  container.style.display = "none";
+
+  if(userAnswer === CORRECT_ANSWER){
+    playSuccess();
   } else {
-    playFailVideo();
+    playFail();
   }
 }
 
-/* ========== 播放全屏失败视频 ========== */
-function playFailVideo(){
+/* 播放失败视频 */
+function playFail(){
   failVideo.style.display = "block";
   failVideo.currentTime = 0;
   failVideo.play().catch(err => {
-    console.log("自动播放被阻止，需要用户交互: ", err);
+    console.log("自动播放失败，需要用户交互: ", err);
   });
-  // 播放完自动隐藏
+  // 播放结束后可再次显示输入容器
   failVideo.onended = () => {
     failVideo.style.display = "none";
+    document.getElementById("submitContainer").style.display = "block";
   };
 }
 
-/* ========== 成功动画：隐藏容器 + 全屏动画（20秒） ========== */
-function startSuccessAnimation(){
-  // 关闭输入容器
-  const submitBox = document.getElementById("submitContainer");
-  submitBox.style.display = "none";
-
-  // 停止失败视频并隐藏
-  failVideo.pause();
-  failVideo.style.display = "none";
-
-  // 显示全屏 success
-  const fs = document.getElementById("successFullscreen");
-  fs.classList.add("active");
-
-  // 分阶段动画：前 5秒 layer1、5~10秒 layer2、10~15秒 layer3、15~20秒 layer4
-  // 在JS中只需触发一次, CSS动画通过 delay 实现分段
-
-  // 每隔200ms 生成彩屑和激光线，直到20秒结束
-  const startTime = Date.now();
-  const DURATION = 20000; // 20秒
-  function animateAll(){
-    const now = Date.now();
-    if(now - startTime < DURATION){
-      // 每次生成 20个彩屑 + 1条激光
-      createConfetti(20);
-      createLaser();
-      setTimeout(animateAll, 200);
-    }
-  }
-  animateAll();
-}
-
-/* 生成彩屑 */
-function createConfetti(count){
-  const confettiArea = document.getElementById("confettiArea");
-  const width = confettiArea.clientWidth;
-  const height = confettiArea.clientHeight;
-
-  for(let i=0; i<count; i++){
-    const div = document.createElement("div");
-    div.classList.add("confetti");
-    // 随机颜色
-    div.style.background = getRandomColor();
-    // 随机位移
-    const rx = (Math.random() * 2 - 1) * 600;  // -600 ~ 600
-    const ry = -(Math.random() * 500 + 100); 
-    div.style.setProperty("--tx", rx + "px");
-    div.style.setProperty("--ty", ry + "px");
-    // 随机起点
-    div.style.left = (Math.random() * width) + "px";
-    div.style.top = (Math.random() * height) + "px";
-
-    confettiArea.appendChild(div);
-    // 4秒后移除
-    setTimeout(()=> {
-      if(div && div.parentNode){
-        div.parentNode.removeChild(div);
-      }
-    }, 4000);
-  }
-}
-
-/* 生成激光线 */
-function createLaser(){
-  const confettiArea = document.getElementById("confettiArea");
-  const laser = document.createElement("div");
-  laser.classList.add("laser");
-
-  // 随机决定水平或垂直
-  const isHorizontal = Math.random() > 0.5;
-  if(isHorizontal){
-    const topPos = Math.random() * confettiArea.clientHeight;
-    laser.style.top = topPos + "px";
-    laser.style.left = "0px";
-    laser.style.width = confettiArea.clientWidth + "px";
-    laser.style.height = "2px";
-  } else {
-    const leftPos = Math.random() * confettiArea.clientWidth;
-    laser.style.left = leftPos + "px";
-    laser.style.top = "0px";
-    laser.style.width = "2px";
-    laser.style.height = confettiArea.clientHeight + "px";
-  }
-
-  // 随机颜色
-  const c = getRandomColor();
-  laser.style.background = `linear-gradient(90deg, transparent, ${c}, transparent)`;
-
-  confettiArea.appendChild(laser);
-  // 1.2s后移除
-  setTimeout(()=>{
-    if(laser.parentNode) laser.parentNode.removeChild(laser);
-  },1200);
-}
-
-/* 随机颜色 */
-function getRandomColor(){
-  const colors = [
-    "#ff0040", "#ff8000", "#ffcc00", 
-    "#00ffcc", "#00bfff", "#ff00ff", 
-    "#ff66ff", "#00ff00", "#ffffff",
-    "#00ff88", "#8888ff"
-  ];
-  return colors[Math.floor(Math.random()*colors.length)];
+/* 播放成功视频 */
+function playSuccess(){
+  successVideo.style.display = "block";
+  successVideo.currentTime = 0;
+  successVideo.play().catch(err => {
+    console.log("自动播放失败，需要用户交互: ", err);
+  });
+  // 播放结束后可做额外逻辑
+  successVideo.onended = () => {
+    successVideo.style.display = "none";
+    // 若需要循环播放可将其注释掉
+    // document.getElementById("submitContainer").style.display = "block";
+  };
 }
 </script>
+
 </body>
 </html>
